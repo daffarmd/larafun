@@ -1,244 +1,364 @@
-@extends('layouts.dashboard', ['title' => 'Atelier Dashboard'])
+@extends('layouts.dashboard', ['title' => 'Upstream Dashboard'])
 
 @section('content')
-    @php
-        $accentMap = [
-            'sage' => 'var(--dashboard-sage)',
-            'sand' => 'var(--dashboard-sand)',
-            'clay' => 'var(--dashboard-clay)',
-            'ink' => 'var(--dashboard-ink-soft)',
-        ];
-
-        $navItems = ['Overview', 'Projects', 'Schedule', 'Activity', 'Reports'];
-    @endphp
-
-    <div class="mx-auto max-w-7xl">
-        <div class="dashboard-shell overflow-hidden lg:grid lg:grid-cols-[255px_minmax(0,1fr)]">
-            <aside class="border-b border-white/65 p-5 lg:border-b-0 lg:border-r lg:p-6">
-                <div class="dashboard-reveal">
-                    <p class="text-xs font-semibold uppercase tracking-[0.32em] text-[color:var(--dashboard-muted)]">Atelier</p>
-                    <h1 class="mt-3 font-display text-4xl leading-none text-[color:var(--dashboard-ink)]">Dashboard</h1>
-                    <p class="mt-3 max-w-[18rem] text-sm leading-6 text-[color:var(--dashboard-muted)]">
-                        A restrained starter layout for teams that want a clear, elegant workspace.
-                    </p>
+    <div class="dashboard-frame">
+        <header class="dashboard-topbar">
+            <div class="dashboard-brand">
+                <div class="dashboard-brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M4 6v5.5c0 4 3.2 7.2 7.2 7.2S18.4 15.5 18.4 11.5V6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        <path d="M4 9.2h4.2M4 12.2h5.8M4 15.2h7.4M9.8 9.2h10.2M8 12.2h12M6.2 15.2h13.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".95"/>
+                    </svg>
                 </div>
+                <div class="dashboard-brand-name">{{ $app['name'] }}</div>
+            </div>
 
-                <nav class="mt-8 space-y-2">
-                    @foreach ($navItems as $item)
-                        <a
-                            href="#"
-                            class="dashboard-nav-link dashboard-reveal {{ $loop->first ? 'is-active' : '' }}"
-                            style="animation-delay: {{ 80 + ($loop->index * 70) }}ms"
-                        >
-                            <span>{{ $item }}</span>
-                            <span class="text-xs text-[color:var(--dashboard-muted)]">{{ str_pad((string) ($loop->iteration), 2, '0', STR_PAD_LEFT) }}</span>
-                        </a>
-                    @endforeach
-                </nav>
+            <div class="dashboard-searchbar">
+                <button type="button" class="dashboard-search-filter">
+                    <span>{{ $app['filter'] }}</span>
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="m7 9 5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <label class="dashboard-search-input">
+                    <span class="sr-only">Search</span>
+                    <input type="text" value="" placeholder="Search" aria-label="Search">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"></circle>
+                        <path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                    </svg>
+                </label>
+            </div>
 
-                <div class="dashboard-card dashboard-reveal mt-8 p-5" style="animation-delay: 380ms">
-                    <p class="text-xs uppercase tracking-[0.24em] text-[color:var(--dashboard-muted)]">Today</p>
-                    <p class="mt-3 text-3xl font-semibold tracking-tight text-[color:var(--dashboard-ink)]">{{ now()->format('d') }}</p>
-                    <p class="mt-1 text-sm text-[color:var(--dashboard-muted)]">{{ now()->format('F Y') }}</p>
-                    <div class="mt-5 rounded-[24px] border border-white/80 bg-white/70 p-4">
-                        <p class="text-sm font-semibold text-[color:var(--dashboard-ink)]">{{ $user['name'] }}</p>
-                        <p class="mt-1 text-sm text-[color:var(--dashboard-muted)]">{{ $user['role'] }}</p>
-                    </div>
-                </div>
+            <div class="dashboard-top-actions">
+                <button type="button" class="dashboard-icon-button" aria-label="Notifications">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M15 17H6.5c-.8 0-1.4-.7-1.2-1.5l.9-4.3A5.7 5.7 0 0 1 12 6.5a5.7 5.7 0 0 1 5.8 4.7l.9 4.3c.2.8-.4 1.5-1.2 1.5H15Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                        <path d="M10.3 17a1.7 1.7 0 0 0 3.4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                    </svg>
+                    <span class="dashboard-notification-dot" aria-hidden="true"></span>
+                </button>
+
+                <button type="button" class="dashboard-profile" aria-label="Open user menu">
+                    <span class="dashboard-profile-avatar">{{ $user['initials'] }}</span>
+                    <span class="dashboard-profile-copy">
+                        <strong>{{ $user['name'] }}</strong>
+                        <span>{{ $user['role'] }}</span>
+                    </span>
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="dashboard-body">
+            <aside class="dashboard-sidebar" aria-label="Primary navigation">
+                <button type="button" class="dashboard-sidebar-button is-active" aria-label="Dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M4.5 4.5h6v6h-6zM13.5 4.5h6v6h-6zM4.5 13.5h6v6h-6zM13.5 13.5h6v6h-6z" fill="currentColor"/>
+                    </svg>
+                </button>
+                <button type="button" class="dashboard-sidebar-button" aria-label="Calendar">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <rect x="4.5" y="5.5" width="15" height="14" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
+                        <path d="M8 3.5v4M16 3.5v4M4.5 10.5h15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <button type="button" class="dashboard-sidebar-button" aria-label="Documents">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M7.5 4.5h7.3l4.2 4.2V19a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 6 19V6a1.5 1.5 0 0 1 1.5-1.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                        <path d="M14.8 4.5V9h4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button type="button" class="dashboard-sidebar-button" aria-label="Building">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M5 19.5h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        <path d="M7.5 19.5V8.5l4.5-2.5 4.5 2.5v11" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                        <path d="M10 11.5h1.6M10 14.5h1.6M14.4 11.5H16M14.4 14.5H16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <div class="dashboard-sidebar-spacer"></div>
+                <button type="button" class="dashboard-sidebar-button dashboard-sidebar-button--ghost" aria-label="Collapse sidebar">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="m8 7 5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M16 7v10M4 12h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                </button>
             </aside>
 
-            <main class="p-5 lg:p-8">
-                <section class="dashboard-card dashboard-reveal p-6 lg:p-8">
-                    <div class="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
-                        <div class="max-w-3xl">
-                            <p class="text-xs font-semibold uppercase tracking-[0.32em] text-[color:var(--dashboard-muted)]">{{ $hero['eyebrow'] }}</p>
-                            <h2 class="mt-4 max-w-2xl font-display text-5xl leading-[0.95] text-[color:var(--dashboard-ink)] md:text-6xl">
-                                {{ $hero['title'] }}
-                            </h2>
-                            <p class="mt-5 max-w-2xl text-base leading-7 text-[color:var(--dashboard-muted)]">
-                                {{ $hero['description'] }}
-                            </p>
-                        </div>
-
-                        <div class="flex flex-wrap gap-3 xl:justify-end">
-                            <a href="#" class="dashboard-btn-primary">Create report</a>
-                            <a href="#" class="dashboard-btn-secondary">Share overview</a>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 flex flex-wrap gap-3">
-                        @foreach ($hero['chips'] as $chip)
-                            <span class="dashboard-pill dashboard-reveal" style="animation-delay: {{ 140 + ($loop->index * 80) }}ms">{{ $chip }}</span>
-                        @endforeach
-                    </div>
-
-                    <div class="mt-8 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-                        <label class="flex min-h-14 items-center gap-3 rounded-full border border-white/80 bg-white/72 px-5 text-sm text-[color:var(--dashboard-muted)] shadow-[0_16px_40px_-28px_rgba(28,34,45,0.42)]">
-                            <svg class="h-4 w-4 text-[color:var(--dashboard-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <circle cx="11" cy="11" r="7"></circle>
-                                <path d="m20 20-3.5-3.5"></path>
-                            </svg>
-                            <span>Search projects, clients, or notes</span>
-                        </label>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="rounded-[28px] border border-white/80 bg-white/70 p-4">
-                                <p class="text-xs uppercase tracking-[0.24em] text-[color:var(--dashboard-muted)]">Next review</p>
-                                <p class="mt-3 text-lg font-semibold text-[color:var(--dashboard-ink)]">11:00 AM</p>
-                                <p class="mt-1 text-sm text-[color:var(--dashboard-muted)]">Northstar checkpoint</p>
-                            </div>
-                            <div class="rounded-[28px] border border-white/80 bg-white/70 p-4">
-                                <p class="text-xs uppercase tracking-[0.24em] text-[color:var(--dashboard-muted)]">Pending approvals</p>
-                                <p class="mt-3 text-lg font-semibold text-[color:var(--dashboard-ink)]">02 items</p>
-                                <p class="mt-1 text-sm text-[color:var(--dashboard-muted)]">Ready for sign-off</p>
-                            </div>
-                        </div>
-                    </div>
+            <main class="dashboard-main">
+                <section class="dashboard-hero">
+                    <p class="dashboard-hero-kicker">
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M5.5 6.5h13l-1.3 11.2a1.5 1.5 0 0 1-1.5 1.3H8.3a1.5 1.5 0 0 1-1.5-1.3L5.5 6.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                            <path d="M9 4.5h6M9.2 9.5h5.6M8.8 13h6.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        <span>{{ $app['module'] }}</span>
+                    </p>
+                    <h1 class="dashboard-hero-title">Events <span>{{ $app['count'] }}</span></h1>
                 </section>
 
-                <section class="mt-6 grid gap-4 md:grid-cols-2 2xl:grid-cols-4">
-                    @foreach ($stats as $stat)
-                        <article class="dashboard-card dashboard-reveal p-5" style="animation-delay: {{ 240 + ($loop->index * 70) }}ms">
-                            <div class="flex items-center justify-between gap-3">
-                                <p class="text-sm text-[color:var(--dashboard-muted)]">{{ $stat['label'] }}</p>
-                                <span class="dashboard-pill">{{ $stat['change'] }}</span>
-                            </div>
-                            <p class="mt-5 text-4xl font-semibold tracking-[-0.04em] text-[color:var(--dashboard-ink)]">{{ $stat['value'] }}</p>
-                            <p class="mt-2 text-sm leading-6 text-[color:var(--dashboard-muted)]">{{ $stat['caption'] }}</p>
-                        </article>
-                    @endforeach
-                </section>
+                <section class="dashboard-workspace">
+                    <div class="dashboard-panel dashboard-panel--list">
+                        <div class="dashboard-panel-tools">
+                            <label class="dashboard-panel-search">
+                                <span class="sr-only">Search events</span>
+                                <input type="text" placeholder="Search" aria-label="Search events">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"></circle>
+                                    <path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+                                </svg>
+                            </label>
 
-                <section class="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_340px]">
-                    <div class="space-y-6">
-                        <article class="dashboard-card dashboard-reveal p-6" style="animation-delay: 520ms">
-                            <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-                                <div>
-                                    <p class="text-xs uppercase tracking-[0.28em] text-[color:var(--dashboard-muted)]">Projects in motion</p>
-                                    <h3 class="mt-3 text-2xl font-semibold tracking-tight text-[color:var(--dashboard-ink)]">Active workspaces</h3>
-                                </div>
-                                <a href="#" class="text-sm font-semibold text-[color:var(--dashboard-ink)]">View all projects</a>
-                            </div>
+                            <button type="button" class="dashboard-icon-button dashboard-icon-button--soft" aria-label="Filter events">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M4 6h16l-6 7v4.5l-4 2V13L4 6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
 
-                            <div class="mt-6 grid gap-4 lg:grid-cols-2">
-                                @foreach ($projects as $project)
-                                    <div
-                                        class="rounded-[30px] border border-white/80 bg-white/72 p-5 shadow-[0_18px_45px_-32px_rgba(28,34,45,0.55)]"
-                                        style="--accent: {{ $accentMap[$project['accent']] ?? 'var(--dashboard-sage)' }}"
-                                    >
-                                        <div class="flex items-start justify-between gap-4">
-                                            <div>
-                                                <p class="text-lg font-semibold text-[color:var(--dashboard-ink)]">{{ $project['name'] }}</p>
-                                                <p class="mt-2 text-sm leading-6 text-[color:var(--dashboard-muted)]">{{ $project['description'] }}</p>
-                                            </div>
-                                            <span class="dashboard-status">{{ $project['status'] }}</span>
-                                        </div>
+                            <button type="button" class="dashboard-create-button">
+                                <span>Create</span>
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="m7 9 5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
 
-                                        <div class="mt-5">
-                                            <div class="flex items-center justify-between text-sm">
-                                                <span class="text-[color:var(--dashboard-muted)]">Completion</span>
-                                                <span class="font-semibold text-[color:var(--dashboard-ink)]">{{ $project['progress'] }}%</span>
-                                            </div>
-                                            <div class="dashboard-progress mt-3">
-                                                <span style="width: {{ $project['progress'] }}%"></span>
-                                            </div>
-                                        </div>
+                        <div class="dashboard-tab-row">
+                            @foreach ($browserTabs as $tab)
+                                <button type="button" class="dashboard-tab {{ $tab['active'] ? 'is-active' : '' }}">
+                                    {{ $tab['label'] }}
+                                </button>
+                            @endforeach
+                        </div>
 
-                                        <div class="mt-5 flex items-center justify-between gap-4 text-sm">
-                                            <div>
-                                                <p class="text-[color:var(--dashboard-muted)]">Owner</p>
-                                                <p class="mt-1 font-semibold text-[color:var(--dashboard-ink)]">{{ $project['owner'] }}</p>
-                                            </div>
-                                            <div class="text-right">
-                                                <p class="text-[color:var(--dashboard-muted)]">Due date</p>
-                                                <p class="mt-1 font-semibold text-[color:var(--dashboard-ink)]">{{ $project['due'] }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                        <div class="dashboard-status-row">
+                            <div class="dashboard-status-chips">
+                                @foreach ($statusTabs as $status)
+                                    <button type="button" class="dashboard-status-chip {{ $loop->first ? 'is-active' : '' }}">
+                                        <span>{{ $status['label'] }}</span>
+                                        <strong>{{ $status['count'] }}</strong>
+                                    </button>
                                 @endforeach
                             </div>
-                        </article>
 
-                        <article class="dashboard-card dashboard-reveal p-6" style="animation-delay: 620ms">
-                            <div class="flex items-center justify-between gap-4">
-                                <div>
-                                    <p class="text-xs uppercase tracking-[0.28em] text-[color:var(--dashboard-muted)]">Recent activity</p>
-                                    <h3 class="mt-3 text-2xl font-semibold tracking-tight text-[color:var(--dashboard-ink)]">Latest updates</h3>
-                                </div>
-                                <a href="#" class="text-sm font-semibold text-[color:var(--dashboard-ink)]">Open inbox</a>
-                            </div>
+                            <button type="button" class="dashboard-icon-button dashboard-icon-button--soft" aria-label="Sort events">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M7 7h10M7 12h7M7 17h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                                    <path d="m16 15 2 2 2-2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
 
-                            <div class="mt-6 space-y-5">
-                                @foreach ($activity as $item)
-                                    <div class="dashboard-timeline-item">
-                                        <div class="rounded-[28px] border border-white/80 bg-white/72 p-5">
-                                            <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                                                <p class="max-w-xl text-base font-semibold leading-7 text-[color:var(--dashboard-ink)]">{{ $item['title'] }}</p>
-                                                <p class="text-sm text-[color:var(--dashboard-muted)]">{{ $item['time'] }}</p>
-                                            </div>
-                                            <p class="mt-3 text-sm leading-6 text-[color:var(--dashboard-muted)]">{{ $item['detail'] }}</p>
+                        <h2 class="dashboard-month">{{ $app['monthLabel'] }}</h2>
+
+                        <div class="dashboard-event-list">
+                            @foreach ($events as $event)
+                                <article class="dashboard-event-card {{ $event['active'] ? 'is-active' : '' }}">
+                                    <div class="dashboard-event-copy">
+                                        <h3 class="dashboard-event-title">{{ $event['title'] }}</h3>
+                                        <p class="dashboard-event-project">{{ $event['project'] }}</p>
+                                        <div class="dashboard-event-meta">
+                                            <span class="dashboard-status-badge {{ $event['status'] === 'Active' ? 'is-active' : 'is-muted' }}">
+                                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                    <path d="M7 6.5v11l10-5.5-10-5.5Z" fill="currentColor"/>
+                                                </svg>
+                                                <span>{{ $event['status'] }}</span>
+                                            </span>
+                                            <span class="dashboard-event-action">{{ $event['action'] }}</span>
+                                        </div>
+
+                                        <div class="dashboard-avatar-stack">
+                                            @foreach ($event['avatars'] as $avatar)
+                                                <span class="dashboard-avatar" style="--avatar-tone: {{ $avatar['tone'] }};">
+                                                    {{ $avatar['initials'] }}
+                                                    @if ($loop->first)
+                                                        <span class="dashboard-avatar-badge">*</span>
+                                                    @endif
+                                                </span>
+                                            @endforeach
+
+                                            @if ($event['extraMembers'])
+                                                <span class="dashboard-avatar dashboard-avatar--extra">+{{ $event['extraMembers'] }}</span>
+                                            @endif
                                         </div>
                                     </div>
-                                @endforeach
-                            </div>
-                        </article>
+
+                                    <div class="dashboard-event-side">
+                                        <div class="dashboard-event-date">
+                                            <span>{{ $event['day'] }}</span>
+                                            <strong>{{ $event['date'] }}</strong>
+                                        </div>
+
+                                        <div class="dashboard-event-stats">
+                                            <span class="dashboard-mini-stat">
+                                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                    <path d="M7.5 4.5h9l3 3v12h-12z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                                                    <path d="M10 10.5h6M10 13.5h6M10 16.5h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                                </svg>
+                                                <strong>{{ $event['notes'] }}</strong>
+                                            </span>
+                                            <span class="dashboard-mini-stat">
+                                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                    <rect x="5" y="5" width="14" height="14" rx="2.5" stroke="currentColor" stroke-width="1.6"/>
+                                                    <path d="m8 12 2.5 2.5L16 9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                                <strong>{{ $event['tasks'] }}</strong>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
                     </div>
 
-                    <div class="space-y-6">
-                        <article class="dashboard-card dashboard-reveal p-6" style="animation-delay: 560ms">
-                            <p class="text-xs uppercase tracking-[0.28em] text-[color:var(--dashboard-muted)]">Focus score</p>
-                            <div class="mt-5 flex items-center justify-center">
-                                <div class="dashboard-ring" style="--value: {{ $focusScore }}%; --ring: var(--dashboard-sage)">
+                    <div class="dashboard-panel dashboard-panel--detail">
+                        <div class="dashboard-detail-head">
+                            <div>
+                                <h2 class="dashboard-detail-title">{{ $selectedEvent['title'] }}</h2>
+                                <p class="dashboard-detail-subtitle">
+                                    <span>{{ $selectedEvent['project'] }}</span>
+                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </p>
+                            </div>
+
+                            <button type="button" class="dashboard-icon-button dashboard-icon-button--soft" aria-label="More actions">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M12 6.5h0M12 12h0M12 17.5h0" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="dashboard-detail-status">
+                            <span class="dashboard-status-badge is-active">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M7 6.5v11l10-5.5-10-5.5Z" fill="currentColor"/>
+                                </svg>
+                                <span>{{ $selectedEvent['status'] }}</span>
+                            </span>
+                            <span class="dashboard-detail-category">{{ $selectedEvent['category'] }}</span>
+                        </div>
+
+                        <div class="dashboard-metric-grid">
+                            @foreach ($selectedEvent['metrics'] as $metric)
+                                <div class="dashboard-metric-card">
                                     <div>
-                                        <p class="text-4xl font-semibold tracking-[-0.05em] text-[color:var(--dashboard-ink)]">{{ $focusScore }}</p>
-                                        <p class="mt-1 text-sm text-[color:var(--dashboard-muted)]">steady pace</p>
+                                        <strong>{{ $metric['value'] }}</strong>
+                                        <span>{{ $metric['label'] }}</span>
                                     </div>
+
+                                    @if ($metric['icon'] === 'calendar')
+                                        <svg class="dashboard-metric-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <rect x="4.5" y="5.5" width="15" height="14" rx="2.4" stroke="currentColor" stroke-width="1.6"/>
+                                            <path d="M8 3.5v4M16 3.5v4M4.5 10.5h15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                        </svg>
+                                    @elseif ($metric['icon'] === 'chevron')
+                                        <svg class="dashboard-metric-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="m8 10 4 4 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    @else
+                                        <svg class="dashboard-metric-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="m8 16 8-8M13 6.5h4.5V11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    @endif
                                 </div>
-                            </div>
-                            <div class="mt-6 space-y-3">
-                                @foreach ($insights as $insight)
-                                    <div class="rounded-[22px] border border-white/80 bg-white/72 px-4 py-3 text-sm leading-6 text-[color:var(--dashboard-muted)]">
-                                        {{ $insight }}
-                                    </div>
-                                @endforeach
-                            </div>
-                        </article>
+                            @endforeach
+                        </div>
 
-                        <article class="dashboard-card dashboard-reveal p-6" style="animation-delay: 660ms">
-                            <div class="flex items-center justify-between gap-4">
-                                <div>
-                                    <p class="text-xs uppercase tracking-[0.28em] text-[color:var(--dashboard-muted)]">Schedule</p>
-                                    <h3 class="mt-3 text-2xl font-semibold tracking-tight text-[color:var(--dashboard-ink)]">Today at a glance</h3>
+                        <div class="dashboard-section-head">
+                            <h3>Members</h3>
+                            <button type="button" class="dashboard-inline-action">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="m14 5 5 5-9 9H5v-5l9-9Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                                    <path d="M13 6l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                </svg>
+                                <span>Edit</span>
+                            </button>
+                        </div>
+
+                        <div class="dashboard-member-row">
+                            @foreach ($selectedEvent['members'] as $member)
+                                <span class="dashboard-avatar dashboard-avatar--member" style="--avatar-tone: {{ $member['tone'] }};">
+                                    {{ $member['initials'] }}
+                                    @if ($member['owner'])
+                                        <span class="dashboard-avatar-badge">*</span>
+                                    @endif
+                                </span>
+                            @endforeach
+
+                            <span class="dashboard-avatar dashboard-avatar--extra">+{{ $selectedEvent['memberOverflow'] }}</span>
+
+                            <button type="button" class="dashboard-member-add" aria-label="Add member">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M12 5.5v13M5.5 12h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="dashboard-section-head">
+                            <h3>Description</h3>
+                            <button type="button" class="dashboard-inline-action">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="m14 5 5 5-9 9H5v-5l9-9Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                                    <path d="M13 6l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                </svg>
+                                <span>Edit</span>
+                            </button>
+                        </div>
+
+                        <p class="dashboard-description">{{ $selectedEvent['description'] }}</p>
+
+                        <div class="dashboard-section-head">
+                            <h3>Attachments</h3>
+                            <button type="button" class="dashboard-inline-action">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M12 5.5v13M5.5 12h13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                </svg>
+                                <span>Add</span>
+                            </button>
+                        </div>
+
+                        <div class="dashboard-attachment-table">
+                            <div class="dashboard-attachment-head">
+                                <span><input type="checkbox" aria-label="Select all attachments"></span>
+                                <span>
+                                    Name
+                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M7 9h10M9 13h6M10 17h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                                    </svg>
+                                </span>
+                                <span>
+                                    Type
+                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M7 9h10M9 13h6M10 17h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                                    </svg>
+                                </span>
+                                <span>
+                                    Modified
+                                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                        <path d="M7 9h10M9 13h6M10 17h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                                    </svg>
+                                </span>
+                            </div>
+
+                            @foreach ($selectedEvent['attachments'] as $attachment)
+                                <div class="dashboard-attachment-row">
+                                    <span><input type="checkbox" aria-label="Select attachment"></span>
+                                    <span class="dashboard-file-name">
+                                        <svg class="dashboard-file-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M7.5 4.5h6.8l4.2 4.2V19a1.5 1.5 0 0 1-1.5 1.5h-9.5A1.5 1.5 0 0 1 6 19V6a1.5 1.5 0 0 1 1.5-1.5Z" fill="currentColor" opacity=".75"/>
+                                            <path d="M14.3 4.5V9h4.2" stroke="white" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <strong>{{ $attachment['name'] }}</strong>
+                                    </span>
+                                    <span>{{ $attachment['type'] }}</span>
+                                    <span>{{ $attachment['modified'] }}</span>
                                 </div>
-                                <p class="text-sm text-[color:var(--dashboard-muted)]">{{ now()->format('D, M j') }}</p>
-                            </div>
-
-                            <div class="mt-6 space-y-4">
-                                @foreach ($schedule as $item)
-                                    <div class="rounded-[28px] border border-white/80 bg-white/72 px-4 py-4">
-                                        <div class="flex items-start gap-4">
-                                            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[rgba(47,107,95,0.08)] text-sm font-semibold text-[color:var(--dashboard-sage)]">
-                                                {{ $item['time'] }}
-                                            </div>
-                                            <div>
-                                                <p class="text-base font-semibold text-[color:var(--dashboard-ink)]">{{ $item['title'] }}</p>
-                                                <p class="mt-2 text-sm leading-6 text-[color:var(--dashboard-muted)]">{{ $item['detail'] }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </article>
-
-                        <article class="dashboard-card dashboard-reveal p-6" style="animation-delay: 760ms">
-                            <p class="text-xs uppercase tracking-[0.28em] text-[color:var(--dashboard-muted)]">Template note</p>
-                            <p class="mt-4 text-xl font-semibold leading-8 text-[color:var(--dashboard-ink)]">
-                                Replace the sample arrays in <span class="font-mono text-base">routes/web.php</span> with controller data whenever you are ready.
-                            </p>
-                            <p class="mt-4 text-sm leading-6 text-[color:var(--dashboard-muted)]">
-                                The layout, cards, and sections are already split cleanly so you can move this into components without rewriting the design.
-                            </p>
-                        </article>
+                            @endforeach
+                        </div>
                     </div>
                 </section>
             </main>
